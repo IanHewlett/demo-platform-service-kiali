@@ -1,0 +1,32 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kiali
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+  project: default
+
+  sources:
+    - chart: kiali-server
+      repoURL: https://kiali.org/helm-charts
+      targetRevision: 1.76.0
+
+      helm:
+        valueFiles:
+          - $values/release/values.yaml
+
+    - repoURL: https://github.com/IanHewlett/demo-platform-service-kiali.git
+      ref: values
+
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: istio-system
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
